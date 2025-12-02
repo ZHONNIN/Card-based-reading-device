@@ -20,6 +20,15 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2d3748;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+            margin-bottom: 30px;
         }
 
         .container {
@@ -27,54 +36,42 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px;
+            width: 100%;
+            max-width: 600px;
         }
 
-        .device {
+        .device-wrapper {
             position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .device-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            pointer-events: none;
+            user-select: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Screen overlay positioned on top of the purple screen area in po.png */
+        .screen-overlay {
+            position: absolute;
             width: 300px;
-            height: 380px;
-            background: #6ba3d4;
-            border: 3px solid #4a7fa8;
-            border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 25px 20px;
-            z-index: 10;
-        }
-
-        .device-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .button {
-            width: 40px;
-            height: 40px;
-            background: #f06292;
-            border: 3px solid #d84077;
-            border-radius: 50%;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .screen-container {
-            position: relative;
-            width: 240px;
-            height: 220px;
-            background: #4a5568;
-            border: 3px solid #2d3748;
-            border-radius: 15px;
-            overflow: hidden;
+            height: 300px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -60%);
+            z-index: 2;
+            pointer-events: none;
             transition: all 0.5s ease;
         }
 
-        .screen-container.active {
-            background: #90caf9;
-            border-color: #64b5f6;
-            box-shadow: 0 0 30px rgba(144, 202, 249, 0.6);
+        .screen-overlay.active {
+            pointer-events: all;
         }
 
         .screen-content {
@@ -105,9 +102,9 @@
         }
 
         .hotspot {
-            width: 180px;
+            width: 220px;
             padding: 15px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.95);
             border: 3px solid #333;
             border-radius: 15px;
             font-size: 18px;
@@ -115,27 +112,20 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
         .hotspot:hover {
             transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 1);
         }
 
         .hotspot:active {
             transform: scale(0.95);
         }
 
-        .card-slot {
-            position: absolute;
-            bottom: 25px;
-            width: 160px;
-            height: 8px;
-            background: #2d3748;
-            border-radius: 4px;
-        }
-
+        /* Green card positioned below the device */
         .card {
             position: absolute;
             width: 150px;
@@ -144,16 +134,16 @@
             border: 3px solid #388e3c;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            top: 420px;
+            bottom: -250px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 5;
+            z-index: 3;
         }
 
         .card.inserted {
-            top: 150px;
+            transform: translate(-50%, -380px);
             cursor: default;
         }
 
@@ -175,10 +165,11 @@
             font-size: 14px;
             font-weight: bold;
             color: #388e3c;
+            transition: opacity 0.3s ease;
         }
 
         .card.inserted .card-label {
-            display: none;
+            opacity: 0;
         }
 
         .controls {
@@ -186,7 +177,9 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 30px;
+            position: relative;
+            z-index: 4;
         }
 
         .remove-btn {
@@ -220,6 +213,7 @@
 
         .feedback {
             min-height: 40px;
+            min-width: 200px;
             padding: 10px 20px;
             background: white;
             border: 3px solid #333;
@@ -236,13 +230,30 @@
             opacity: 1;
         }
 
-        .title {
-            position: absolute;
-            top: 20px;
-            font-size: 28px;
-            font-weight: bold;
-            color: #2d3748;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+        @media (max-width: 600px) {
+            .device-wrapper {
+                max-width: 90%;
+            }
+
+            .screen-overlay {
+                width: 250px;
+                height: 250px;
+            }
+
+            .hotspot {
+                width: 180px;
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .card {
+                width: 120px;
+                height: 160px;
+            }
+
+            .card::before {
+                font-size: 50px;
+            }
         }
     </style>
 </head>
@@ -250,13 +261,12 @@
     <div class="title">🎴 Card Reader Toy</div>
 
     <div class="container">
-        <div class="device">
-            <div class="device-buttons">
-                <div class="button"></div>
-                <div class="button"></div>
-            </div>
+        <div class="device-wrapper">
+            <!-- Fixed device background image -->
+            <img src="po.png" alt="Card Reader Device" class="device-image" id="deviceImage">
 
-            <div class="screen-container" id="screen">
+            <!-- Screen overlay positioned on top of the purple screen area -->
+            <div class="screen-overlay" id="screenOverlay">
                 <div class="screen-content" id="screenContent">
                     <div class="hotspot" data-sound="frog">🐸 Frog</div>
                     <div class="hotspot" data-sound="leaf">🌿 Leaf</div>
@@ -264,11 +274,10 @@
                 </div>
             </div>
 
-            <div class="card-slot"></div>
-        </div>
-
-        <div class="card" id="card">
-            <div class="card-label">Click to Insert →</div>
+            <!-- Green card that slides up -->
+            <div class="card" id="card">
+                <div class="card-label">Click to Insert →</div>
+            </div>
         </div>
 
         <div class="controls">
@@ -279,7 +288,7 @@
 
     <script>
         const card = document.getElementById('card');
-        const screen = document.getElementById('screen');
+        const screenOverlay = document.getElementById('screenOverlay');
         const screenContent = document.getElementById('screenContent');
         const removeBtn = document.getElementById('removeBtn');
         const feedback = document.getElementById('feedback');
@@ -287,19 +296,19 @@
 
         let isCardInserted = false;
 
-        // Card click handler
+        // Card click handler - insert card into slot
         card.addEventListener('click', () => {
             if (!isCardInserted) {
                 insertCard();
             }
         });
 
-        // Remove button handler
+        // Remove button handler - slide card back down
         removeBtn.addEventListener('click', () => {
             removeCard();
         });
 
-        // Hotspot handlers
+        // Hotspot handlers - play sounds when clicked
         hotspots.forEach(hotspot => {
             hotspot.addEventListener('click', () => {
                 const sound = hotspot.getAttribute('data-sound');
@@ -311,20 +320,23 @@
             isCardInserted = true;
             card.classList.add('inserted');
 
+            // Activate screen after card slides up
             setTimeout(() => {
-                screen.classList.add('active');
+                screenOverlay.classList.add('active');
                 screenContent.classList.add('visible');
                 removeBtn.classList.add('visible');
             }, 500);
         }
 
         function removeCard() {
-            screen.classList.remove('active');
+            // Deactivate screen
+            screenOverlay.classList.remove('active');
             screenContent.classList.remove('visible');
             removeBtn.classList.remove('visible');
             feedback.classList.remove('visible');
             feedback.textContent = '';
 
+            // Slide card back down
             setTimeout(() => {
                 card.classList.remove('inserted');
                 isCardInserted = false;
@@ -349,6 +361,7 @@
             feedback.textContent = message;
             feedback.classList.add('visible');
 
+            // Hide feedback after 2 seconds
             setTimeout(() => {
                 feedback.classList.remove('visible');
             }, 2000);
