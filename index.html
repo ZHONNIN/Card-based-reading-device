@@ -133,7 +133,7 @@
         }
 
         .card-image.inserted {
-            top: 580px;
+            top: 615px;
             cursor: default;
             z-index: 1;
         }
@@ -150,6 +150,8 @@
             transition: opacity 0.3s ease;
             white-space: nowrap;
             z-index: 6;
+            cursor: pointer;
+            padding: 10px 20px;
         }
 
         .card-label.hidden {
@@ -250,7 +252,7 @@
             }
 
             .card-image.inserted {
-                top: 520px;
+                top: 555px;
             }
 
             .card-label {
@@ -298,6 +300,12 @@
         let isCardInserted = false;
 
         cardImage.addEventListener('click', () => {
+            if (!isCardInserted) {
+                insertCard();
+            }
+        });
+
+        cardLabel.addEventListener('click', () => {
             if (!isCardInserted) {
                 insertCard();
             }
