@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Reader Toy – Web Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #fce4ec 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .device {
+            position: relative;
+            width: 300px;
+            height: 380px;
+            background: #6ba3d4;
+            border: 3px solid #4a7fa8;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px 20px;
+            z-index: 10;
+        }
+
+        .device-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            width: 40px;
+            height: 40px;
+            background: #f06292;
+            border: 3px solid #d84077;
+            border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .screen-container {
+            position: relative;
+            width: 240px;
+            height: 220px;
+            background: #4a5568;
+            border: 3px solid #2d3748;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .screen-container.active {
+            background: #90caf9;
+            border-color: #64b5f6;
+            box-shadow: 0 0 30px rgba(144, 202, 249, 0.6);
+        }
+
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen-content.visible {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .hotspot {
+            width: 180px;
+            padding: 15px;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .hotspot:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .hotspot:active {
+            transform: scale(0.95);
+        }
+
+        .card-slot {
+            position: absolute;
+            bottom: 25px;
+            width: 160px;
+            height: 8px;
+            background: #2d3748;
+            border-radius: 4px;
+        }
+
+        .card {
+            position: absolute;
+            width: 150px;
+            height: 200px;
+            background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+            border: 3px solid #388e3c;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            top: 420px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+
+        .card.inserted {
+            top: 150px;
+            cursor: default;
+        }
+
+        .card::before {
+            content: '🃏';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            opacity: 0.3;
+        }
+
+        .card-label {
+            position: absolute;
+            bottom: -40px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #388e3c;
+        }
+
+        .card.inserted .card-label {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .remove-btn {
+            padding: 12px 30px;
+            background: #ff6b6b;
+            color: white;
+            border: 3px solid #c92a2a;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .remove-btn.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .remove-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .remove-btn:active {
+            transform: translateY(0);
+        }
+
+        .feedback {
+            min-height: 40px;
+            padding: 10px 20px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback.visible {
+            opacity: 1;
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #2d3748;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="title">🎴 Card Reader Toy</div>
+
+    <div class="container">
+        <div class="device">
+            <div class="device-buttons">
+                <div class="button"></div>
+                <div class="button"></div>
+            </div>
+
+            <div class="screen-container" id="screen">
+                <div class="screen-content" id="screenContent">
+                    <div class="hotspot" data-sound="frog">🐸 Frog</div>
+                    <div class="hotspot" data-sound="leaf">🌿 Leaf</div>
+                    <div class="hotspot" data-sound="water">💧 Water Drop</div>
+                </div>
+            </div>
+
+            <div class="card-slot"></div>
+        </div>
+
+        <div class="card" id="card">
+            <div class="card-label">Click to Insert →</div>
+        </div>
+
+        <div class="controls">
+            <button class="remove-btn" id="removeBtn">Remove Card</button>
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        const card = document.getElementById('card');
+        const screen = document.getElementById('screen');
+        const screenContent = document.getElementById('screenContent');
+        const removeBtn = document.getElementById('removeBtn');
+        const feedback = document.getElementById('feedback');
+        const hotspots = document.querySelectorAll('.hotspot');
+
+        let isCardInserted = false;
+
+        // Card click handler
+        card.addEventListener('click', () => {
+            if (!isCardInserted) {
+                insertCard();
+            }
+        });
+
+        // Remove button handler
+        removeBtn.addEventListener('click', () => {
+            removeCard();
+        });
+
+        // Hotspot handlers
+        hotspots.forEach(hotspot => {
+            hotspot.addEventListener('click', () => {
+                const sound = hotspot.getAttribute('data-sound');
+                playSound(sound);
+            });
+        });
+
+        function insertCard() {
+            isCardInserted = true;
+            card.classList.add('inserted');
+
+            setTimeout(() => {
+                screen.classList.add('active');
+                screenContent.classList.add('visible');
+                removeBtn.classList.add('visible');
+            }, 500);
+        }
+
+        function removeCard() {
+            screen.classList.remove('active');
+            screenContent.classList.remove('visible');
+            removeBtn.classList.remove('visible');
+            feedback.classList.remove('visible');
+            feedback.textContent = '';
+
+            setTimeout(() => {
+                card.classList.remove('inserted');
+                isCardInserted = false;
+            }, 300);
+        }
+
+        function playSound(type) {
+            let message = '';
+
+            switch(type) {
+                case 'frog':
+                    message = '🐸 Croak croak!';
+                    break;
+                case 'leaf':
+                    message = '🌿 Rustling sound…';
+                    break;
+                case 'water':
+                    message = '💧 Splash!';
+                    break;
+            }
+
+            feedback.textContent = message;
+            feedback.classList.add('visible');
+
+            setTimeout(() => {
+                feedback.classList.remove('visible');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
