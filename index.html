@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Reader Toy – Multi-Card Demo</title>
+    <title>Card Reader Toy – Fan-Spread Cards</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
             overflow: hidden;
             position: fixed;
         }
@@ -31,13 +30,16 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            gap: 20px;
+            height: 100%;
+            justify-content: space-between;
+            padding: 20px;
         }
 
         .device-wrapper {
             position: relative;
             width: 940px;
             margin: 0 auto;
+            flex-shrink: 0;
         }
 
         .device-image {
@@ -58,7 +60,7 @@
             left: 50%;
             transform: translate(-50%, -58%);
             z-index: 11;
-            pointer-events: all;
+            pointer-events: none;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -74,8 +76,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 30px;
-            animation: fadeIn 0.5s ease;
+            gap: 25px;
+            animation: fadeIn 0.4s ease-out;
         }
 
         .screen-content.visible {
@@ -85,7 +87,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: scale(0.9);
+                transform: scale(0.85);
             }
             to {
                 opacity: 1;
@@ -94,20 +96,20 @@
         }
 
         .screen-emoji {
-            font-size: 120px;
+            font-size: 110px;
             line-height: 1;
         }
 
         .screen-word {
-            font-size: 60px;
+            font-size: 56px;
             font-weight: bold;
-            color: #333;
+            color: #2d3748;
             text-align: center;
         }
 
         .screen-pronunciation {
-            font-size: 36px;
-            color: #666;
+            font-size: 32px;
+            color: #4a5568;
             font-style: italic;
             text-align: center;
         }
@@ -115,7 +117,7 @@
         .device-mask {
             position: absolute;
             width: 100%;
-            height: 50%;
+            height: 55%;
             bottom: 0;
             left: 0;
             z-index: 9;
@@ -124,9 +126,9 @@
 
         .slot-area {
             position: absolute;
-            width: 200px;
-            height: 300px;
-            top: 200px;
+            width: 220px;
+            height: 320px;
+            top: 180px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 8;
@@ -134,74 +136,88 @@
         }
 
         .cards-container {
-            display: flex;
-            gap: 40px;
-            align-items: center;
-            justify-content: center;
-            margin-top: 20px;
             position: relative;
-            z-index: 4;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            width: 100%;
+            height: 350px;
+            margin-bottom: 20px;
         }
 
         .card {
-            position: relative;
+            position: absolute;
             width: auto;
-            height: 240px;
+            height: 280px;
             cursor: grab;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.25));
+            transition: transform 0.3s ease, z-index 0s;
+            filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3));
             user-select: none;
+            transform-origin: center bottom;
         }
 
         .card:hover {
-            transform: scale(1.05);
+            filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.4));
         }
 
         .card:active {
             cursor: grabbing;
         }
 
+        .card[data-card-id="frog"] {
+            left: calc(50% - 180px);
+            transform: translateX(-50%) rotate(-10deg);
+            z-index: 13;
+        }
+
+        .card[data-card-id="leaf"] {
+            left: 50%;
+            transform: translateX(-50%) rotate(0deg);
+            z-index: 15;
+        }
+
+        .card[data-card-id="water"] {
+            left: calc(50% + 180px);
+            transform: translateX(-50%) rotate(10deg);
+            z-index: 14;
+        }
+
         .card.dragging {
-            opacity: 0.5;
-            z-index: 100;
+            z-index: 999 !important;
+            transition: none;
+            cursor: grabbing;
         }
 
         .card.inserted {
-            position: absolute;
-            top: 300px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1;
+            position: absolute !important;
+            top: 300px !important;
+            left: 50% !important;
+            transform: translateX(-50%) rotate(0deg) !important;
+            z-index: 1 !important;
             cursor: pointer;
-            transition: top 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: top 0.4s ease-out, transform 0.4s ease-out !important;
         }
 
         .card.returning {
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card-placeholder {
-            width: 160px;
-            height: 240px;
-            border: 3px dashed #ccc;
-            border-radius: 12px;
-            opacity: 0.5;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
 
         .remove-btn {
-            padding: 20px 50px;
+            padding: 18px 45px;
             background: #ff6b6b;
             color: white;
             border: 4px solid #c92a2a;
-            border-radius: 40px;
-            font-size: 28px;
+            border-radius: 36px;
+            font-size: 26px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
             opacity: 0;
             pointer-events: none;
-            margin-top: 20px;
+            position: absolute;
+            bottom: 30px;
+            z-index: 20;
         }
 
         .remove-btn.visible {
@@ -211,37 +227,18 @@
 
         .remove-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
         }
 
         .remove-btn:active {
             transform: translateY(0);
-        }
-
-        @media (max-width: 1200px) {
-            .device-wrapper {
-                width: 700px;
-            }
-
-            .screen-overlay {
-                width: 450px;
-                height: 450px;
-            }
-
-            .card {
-                height: 180px;
-            }
-
-            .card.inserted {
-                top: 250px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="device-wrapper">
-            <img src="po.png" alt="Card Reader Device" class="device-image">
+            <img src="po.png" alt="Card Reader Device" class="device-image" id="deviceImage">
 
             <div class="screen-overlay" id="screenOverlay">
                 <div class="screen-content" id="screenContent">
@@ -256,9 +253,32 @@
         </div>
 
         <div class="cards-container" id="cardsContainer">
-            <img src="card1.png" alt="Frog Card" class="card" data-card-id="frog" data-emoji="🐸" data-word="Frog" data-pronunciation="/frɒg/" draggable="true">
-            <img src="card2.png" alt="Leaf Card" class="card" data-card-id="leaf" data-emoji="🌿" data-word="Leaf" data-pronunciation="/liːf/" draggable="true">
-            <img src="card3.png" alt="Water Card" class="card" data-card-id="water" data-emoji="💧" data-word="Water" data-pronunciation="/ˈwɔːtər/" draggable="true">
+            <img src="card1.png" alt="Frog Card" class="card"
+                 data-card-id="frog"
+                 data-emoji="🐸"
+                 data-word="Frog"
+                 data-pronunciation="/frɒg/"
+                 data-rotation="-10"
+                 data-position-offset="-180"
+                 data-z-index="13">
+
+            <img src="card2.png" alt="Leaf Card" class="card"
+                 data-card-id="leaf"
+                 data-emoji="🌿"
+                 data-word="Leaf"
+                 data-pronunciation="/liːf/"
+                 data-rotation="0"
+                 data-position-offset="0"
+                 data-z-index="15">
+
+            <img src="card3.png" alt="Water Card" class="card"
+                 data-card-id="water"
+                 data-emoji="💧"
+                 data-word="Water"
+                 data-pronunciation="/ˈwɔːtər/"
+                 data-rotation="10"
+                 data-position-offset="180"
+                 data-z-index="14">
         </div>
 
         <button class="remove-btn" id="removeBtn">Remove Card</button>
@@ -268,7 +288,7 @@
         const cards = document.querySelectorAll('.card');
         const cardsContainer = document.getElementById('cardsContainer');
         const slotArea = document.getElementById('slotArea');
-        const screenOverlay = document.getElementById('screenOverlay');
+        const deviceWrapper = document.querySelector('.device-wrapper');
         const screenContent = document.getElementById('screenContent');
         const screenEmoji = document.getElementById('screenEmoji');
         const screenWord = document.getElementById('screenWord');
@@ -277,13 +297,18 @@
 
         let currentInsertedCard = null;
         let draggedCard = null;
-        let cardOriginalPositions = new Map();
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let cardStartX = 0;
+        let cardStartY = 0;
 
-        // Store original positions
-        cards.forEach((card, index) => {
-            const rect = card.getBoundingClientRect();
-            cardOriginalPositions.set(card, {
-                index: index,
+        // Store original card data
+        const cardOriginalData = new Map();
+        cards.forEach(card => {
+            cardOriginalData.set(card, {
+                rotation: card.getAttribute('data-rotation'),
+                positionOffset: card.getAttribute('data-position-offset'),
+                zIndex: card.getAttribute('data-z-index'),
                 parent: card.parentElement
             });
         });
@@ -291,7 +316,7 @@
         // Click to insert/remove
         cards.forEach(card => {
             card.addEventListener('click', (e) => {
-                if (!card.classList.contains('dragging')) {
+                if (!card.classList.contains('dragging') && !draggedCard) {
                     if (card === currentInsertedCard) {
                         removeCard(card);
                     } else {
@@ -299,57 +324,85 @@
                     }
                 }
             });
+
+            // Mouse drag
+            card.addEventListener('mousedown', startDrag);
+
+            // Touch drag
+            card.addEventListener('touchstart', startDrag, { passive: false });
         });
 
-        // Drag and drop
-        cards.forEach(card => {
-            card.addEventListener('dragstart', (e) => {
-                draggedCard = card;
-                card.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
-            });
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag, { passive: false });
 
-            card.addEventListener('dragend', (e) => {
-                card.classList.remove('dragging');
-
-                const slotRect = slotArea.getBoundingClientRect();
-                const cardRect = card.getBoundingClientRect();
-
-                const isOverSlot = (
-                    cardRect.left < slotRect.right &&
-                    cardRect.right > slotRect.left &&
-                    cardRect.top < slotRect.bottom &&
-                    cardRect.bottom > slotRect.top
-                );
-
-                if (isOverSlot) {
-                    insertCard(card);
-                } else if (card === currentInsertedCard) {
-                    // Dragged out of slot
-                    removeCard(card);
-                }
-
-                draggedCard = null;
-            });
-        });
-
-        slotArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-        });
-
-        slotArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (draggedCard) {
-                insertCard(draggedCard);
-            }
-        });
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
 
         removeBtn.addEventListener('click', () => {
             if (currentInsertedCard) {
                 removeCard(currentInsertedCard);
             }
         });
+
+        function startDrag(e) {
+            const card = e.currentTarget;
+            if (card.classList.contains('inserted')) return;
+
+            e.preventDefault();
+            draggedCard = card;
+
+            const touch = e.touches ? e.touches[0] : e;
+            dragStartX = touch.clientX;
+            dragStartY = touch.clientY;
+
+            const rect = card.getBoundingClientRect();
+            cardStartX = rect.left;
+            cardStartY = rect.top;
+
+            card.classList.add('dragging');
+            card.style.position = 'fixed';
+            card.style.left = rect.left + 'px';
+            card.style.top = rect.top + 'px';
+            card.style.transform = 'translateX(-50%)';
+            card.style.zIndex = '999';
+        }
+
+        function drag(e) {
+            if (!draggedCard) return;
+            e.preventDefault();
+
+            const touch = e.touches ? e.touches[0] : e;
+            const deltaX = touch.clientX - dragStartX;
+            const deltaY = touch.clientY - dragStartY;
+
+            draggedCard.style.left = (cardStartX + deltaX) + 'px';
+            draggedCard.style.top = (cardStartY + deltaY) + 'px';
+        }
+
+        function endDrag(e) {
+            if (!draggedCard) return;
+
+            const card = draggedCard;
+            card.classList.remove('dragging');
+
+            const cardRect = card.getBoundingClientRect();
+            const slotRect = slotArea.getBoundingClientRect();
+
+            const isOverSlot = (
+                cardRect.left < slotRect.right &&
+                cardRect.right > slotRect.left &&
+                cardRect.top < slotRect.bottom &&
+                cardRect.bottom > slotRect.top
+            );
+
+            if (isOverSlot) {
+                insertCard(card);
+            } else {
+                returnCardToOriginalPosition(card);
+            }
+
+            draggedCard = null;
+        }
 
         function insertCard(card) {
             // Remove previous card if exists
@@ -361,11 +414,9 @@
             currentInsertedCard = card;
             card.classList.add('inserted');
             card.classList.remove('returning');
-            card.style.position = 'absolute';
-            card.style.top = '300px';
-            card.style.left = '50%';
-            card.style.transform = 'translateX(-50%)';
-            card.style.zIndex = '1';
+
+            // Move to device wrapper
+            deviceWrapper.appendChild(card);
 
             // Update screen content
             const emoji = card.getAttribute('data-emoji');
@@ -379,48 +430,58 @@
 
             // Show remove button
             removeBtn.classList.add('visible');
-
-            // Move to device wrapper
-            const deviceWrapper = document.querySelector('.device-wrapper');
-            deviceWrapper.appendChild(card);
         }
 
         function removeCard(card, silent = false) {
             if (!card) return;
 
             card.classList.remove('inserted');
-            card.classList.add('returning');
 
             // Clear screen
-            screenContent.classList.remove('visible');
-            removeBtn.classList.remove('visible');
+            if (!silent) {
+                screenContent.classList.remove('visible');
+                removeBtn.classList.remove('visible');
+            }
 
             // Return to original position
-            const originalData = cardOriginalPositions.get(card);
-            if (originalData) {
-                originalData.parent.appendChild(card);
-
-                setTimeout(() => {
-                    card.style.position = '';
-                    card.style.top = '';
-                    card.style.left = '';
-                    card.style.transform = '';
-                    card.style.zIndex = '';
-                    card.classList.remove('returning');
-                }, 100);
-            }
+            returnCardToOriginalPosition(card);
 
             if (currentInsertedCard === card) {
                 currentInsertedCard = null;
             }
         }
 
-        // Prevent default drag behavior on images
+        function returnCardToOriginalPosition(card) {
+            const originalData = cardOriginalData.get(card);
+            if (!originalData) return;
+
+            card.classList.add('returning');
+
+            // Return to cards container
+            originalData.parent.appendChild(card);
+
+            // Reset styles
+            setTimeout(() => {
+                card.style.position = '';
+                card.style.left = '';
+                card.style.top = '';
+                card.style.transform = '';
+                card.style.zIndex = '';
+
+                // Reapply original positioning via class
+                const cardId = card.getAttribute('data-card-id');
+                card.setAttribute('data-card-id', cardId);
+
+                setTimeout(() => {
+                    card.classList.remove('returning');
+                }, 100);
+            }, 50);
+        }
+
+        // Prevent default drag on all images
         document.querySelectorAll('img').forEach(img => {
             img.addEventListener('dragstart', (e) => {
-                if (!img.classList.contains('card')) {
-                    e.preventDefault();
-                }
+                e.preventDefault();
             });
         });
     </script>
