@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Reader Toy – Web Demo</title>
+    <title>Card Reader Toy – Multi-Card Demo</title>
     <style>
         * {
             margin: 0;
@@ -20,13 +20,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
+            padding: 20px;
             overflow: hidden;
             position: fixed;
-        }
-
-        .title {
-            display: none;
         }
 
         .container {
@@ -35,6 +31,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
+            gap: 20px;
         }
 
         .device-wrapper {
@@ -61,11 +58,13 @@
             left: 50%;
             transform: translate(-50%, -58%);
             z-index: 11;
-            pointer-events: none;
-        }
-
-        .screen-overlay.active {
             pointer-events: all;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px;
         }
 
         .screen-content {
@@ -75,8 +74,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 36px;
-            padding: 30px;
+            gap: 30px;
             animation: fadeIn 0.5s ease;
         }
 
@@ -95,67 +93,23 @@
             }
         }
 
-        .hotspot {
-            width: 480px;
-            padding: 32px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 6px solid #333;
-            border-radius: 30px;
+        .screen-emoji {
+            font-size: 120px;
+            line-height: 1;
+        }
+
+        .screen-word {
+            font-size: 60px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        .screen-pronunciation {
             font-size: 36px;
-            font-weight: bold;
+            color: #666;
+            font-style: italic;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-        }
-
-        .hotspot:hover {
-            transform: scale(1.08);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-            background: rgba(255, 255, 255, 1);
-        }
-
-        .hotspot:active {
-            transform: scale(0.98);
-        }
-
-        .card-image {
-            position: absolute;
-            width: auto;
-            height: 480px;
-            top: 650px;
-            left: 50%;
-            transform: translateX(-50%);
-            cursor: pointer;
-            transition: top 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 5;
-            filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.25));
-        }
-
-        .card-image.inserted {
-            top: 300px;
-            cursor: default;
-            z-index: 1;
-        }
-
-        .card-label {
-            position: absolute;
-            top: 1155px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            font-size: 30px;
-            font-weight: bold;
-            color: #2e7d32;
-            transition: opacity 0.3s ease;
-            white-space: nowrap;
-            z-index: 6;
-            cursor: pointer;
-            padding: 10px 20px;
-        }
-
-        .card-label.hidden {
-            opacity: 0;
         }
 
         .device-mask {
@@ -168,29 +122,86 @@
             pointer-events: none;
         }
 
-        .controls {
+        .slot-area {
+            position: absolute;
+            width: 200px;
+            height: 300px;
+            top: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 8;
+            pointer-events: all;
+        }
+
+        .cards-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             gap: 40px;
-            margin-top: 80px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
             position: relative;
-            z-index: 12;
+            z-index: 4;
+        }
+
+        .card {
+            position: relative;
+            width: auto;
+            height: 240px;
+            cursor: grab;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.25));
+            user-select: none;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card.dragging {
+            opacity: 0.5;
+            z-index: 100;
+        }
+
+        .card.inserted {
+            position: absolute;
+            top: 300px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            cursor: pointer;
+            transition: top 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card.returning {
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-placeholder {
+            width: 160px;
+            height: 240px;
+            border: 3px dashed #ccc;
+            border-radius: 12px;
+            opacity: 0.5;
         }
 
         .remove-btn {
-            padding: 28px 70px;
+            padding: 20px 50px;
             background: #ff6b6b;
             color: white;
-            border: 6px solid #c92a2a;
-            border-radius: 56px;
-            font-size: 34px;
+            border: 4px solid #c92a2a;
+            border-radius: 40px;
+            font-size: 28px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             opacity: 0;
             pointer-events: none;
+            margin-top: 20px;
         }
 
         .remove-btn.visible {
@@ -198,178 +209,220 @@
             pointer-events: all;
         }
 
-        .remove-btn.hover {
+        .remove-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 7px 18px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
         }
 
         .remove-btn:active {
             transform: translateY(0);
         }
 
-        .feedback {
-            min-height: 100px;
-            min-width: 500px;
-            padding: 24px 50px;
-            background: white;
-            border: 6px solid #333;
-            border-radius: 44px;
-            font-size: 38px;
-            font-weight: bold;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .feedback.visible {
-            opacity: 1;
-        }
-
-        @media (max-width: 600px) {
+        @media (max-width: 1200px) {
             .device-wrapper {
-                width: 90%;
-                max-width: 400px;
+                width: 700px;
             }
 
             .screen-overlay {
-                width: 250px;
-                height: 250px;
+                width: 450px;
+                height: 450px;
             }
 
-            .hotspot {
-                width: 200px;
-                padding: 14px;
-                font-size: 16px;
+            .card {
+                height: 180px;
             }
 
-            .card-image {
-                height: 400px;
-                top: 580px;
-            }
-
-            .card-image.inserted {
-                top: 270px;
-            }
-
-            .card-label {
-                top: 1000px;
+            .card.inserted {
+                top: 250px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="title">🎴 Card Reader Toy</div>
-
     <div class="container">
         <div class="device-wrapper">
             <img src="po.png" alt="Card Reader Device" class="device-image">
 
             <div class="screen-overlay" id="screenOverlay">
                 <div class="screen-content" id="screenContent">
-                    <div class="hotspot" data-sound="frog">🐸 Frog</div>
-                    <div class="hotspot" data-sound="leaf">🌿 Leaf</div>
-                    <div class="hotspot" data-sound="water">💧 Water Drop</div>
+                    <div class="screen-emoji" id="screenEmoji"></div>
+                    <div class="screen-word" id="screenWord"></div>
+                    <div class="screen-pronunciation" id="screenPronunciation"></div>
                 </div>
             </div>
 
             <div class="device-mask"></div>
-
-            <img src="Card.png" alt="Card" class="card-image" id="cardImage">
-            <div class="card-label" id="cardLabel">Click to Insert →</div>
+            <div class="slot-area" id="slotArea"></div>
         </div>
 
-        <div class="controls">
-            <button class="remove-btn" id="removeBtn">Remove Card</button>
-            <div class="feedback" id="feedback"></div>
+        <div class="cards-container" id="cardsContainer">
+            <img src="card1.png" alt="Frog Card" class="card" data-card-id="frog" data-emoji="🐸" data-word="Frog" data-pronunciation="/frɒg/" draggable="true">
+            <img src="card2.png" alt="Leaf Card" class="card" data-card-id="leaf" data-emoji="🌿" data-word="Leaf" data-pronunciation="/liːf/" draggable="true">
+            <img src="card3.png" alt="Water Card" class="card" data-card-id="water" data-emoji="💧" data-word="Water" data-pronunciation="/ˈwɔːtər/" draggable="true">
         </div>
+
+        <button class="remove-btn" id="removeBtn">Remove Card</button>
     </div>
 
     <script>
-        const cardImage = document.getElementById('cardImage');
-        const cardLabel = document.getElementById('cardLabel');
+        const cards = document.querySelectorAll('.card');
+        const cardsContainer = document.getElementById('cardsContainer');
+        const slotArea = document.getElementById('slotArea');
         const screenOverlay = document.getElementById('screenOverlay');
         const screenContent = document.getElementById('screenContent');
+        const screenEmoji = document.getElementById('screenEmoji');
+        const screenWord = document.getElementById('screenWord');
+        const screenPronunciation = document.getElementById('screenPronunciation');
         const removeBtn = document.getElementById('removeBtn');
-        const feedback = document.getElementById('feedback');
-        const hotspots = document.querySelectorAll('.hotspot');
 
-        let isCardInserted = false;
+        let currentInsertedCard = null;
+        let draggedCard = null;
+        let cardOriginalPositions = new Map();
 
-        cardImage.addEventListener('click', () => {
-            if (!isCardInserted) {
-                insertCard();
-            }
+        // Store original positions
+        cards.forEach((card, index) => {
+            const rect = card.getBoundingClientRect();
+            cardOriginalPositions.set(card, {
+                index: index,
+                parent: card.parentElement
+            });
         });
 
-        cardLabel.addEventListener('click', () => {
-            if (!isCardInserted) {
-                insertCard();
+        // Click to insert/remove
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!card.classList.contains('dragging')) {
+                    if (card === currentInsertedCard) {
+                        removeCard(card);
+                    } else {
+                        insertCard(card);
+                    }
+                }
+            });
+        });
+
+        // Drag and drop
+        cards.forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                draggedCard = card;
+                card.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            card.addEventListener('dragend', (e) => {
+                card.classList.remove('dragging');
+
+                const slotRect = slotArea.getBoundingClientRect();
+                const cardRect = card.getBoundingClientRect();
+
+                const isOverSlot = (
+                    cardRect.left < slotRect.right &&
+                    cardRect.right > slotRect.left &&
+                    cardRect.top < slotRect.bottom &&
+                    cardRect.bottom > slotRect.top
+                );
+
+                if (isOverSlot) {
+                    insertCard(card);
+                } else if (card === currentInsertedCard) {
+                    // Dragged out of slot
+                    removeCard(card);
+                }
+
+                draggedCard = null;
+            });
+        });
+
+        slotArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        });
+
+        slotArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedCard) {
+                insertCard(draggedCard);
             }
         });
 
         removeBtn.addEventListener('click', () => {
-            removeCard();
+            if (currentInsertedCard) {
+                removeCard(currentInsertedCard);
+            }
         });
 
-        hotspots.forEach(hotspot => {
-            hotspot.addEventListener('click', () => {
-                const sound = hotspot.getAttribute('data-sound');
-                playSound(sound);
-            });
-        });
-
-        function insertCard() {
-            isCardInserted = true;
-            cardImage.classList.add('inserted');
-            cardLabel.classList.add('hidden');
-
-            setTimeout(() => {
-                screenOverlay.classList.add('active');
-                screenContent.classList.add('visible');
-                removeBtn.classList.add('visible');
-            }, 600);
-        }
-
-        function removeCard() {
-            screenOverlay.classList.remove('active');
-            screenContent.classList.remove('visible');
-            removeBtn.classList.remove('visible');
-            feedback.classList.remove('visible');
-            feedback.textContent = '';
-
-            setTimeout(() => {
-                cardImage.classList.remove('inserted');
-                cardLabel.classList.remove('hidden');
-                isCardInserted = false;
-            }, 400);
-        }
-
-        function playSound(type) {
-            let message = '';
-
-            switch(type) {
-                case 'frog':
-                    message = '🐸 Croak croak!';
-                    break;
-                case 'leaf':
-                    message = '🌿 Rustling sound…';
-                    break;
-                case 'water':
-                    message = '💧 Splash!';
-                    break;
+        function insertCard(card) {
+            // Remove previous card if exists
+            if (currentInsertedCard && currentInsertedCard !== card) {
+                removeCard(currentInsertedCard, true);
             }
 
-            feedback.textContent = message;
-            feedback.classList.add('visible');
+            // Insert new card
+            currentInsertedCard = card;
+            card.classList.add('inserted');
+            card.classList.remove('returning');
+            card.style.position = 'absolute';
+            card.style.top = '300px';
+            card.style.left = '50%';
+            card.style.transform = 'translateX(-50%)';
+            card.style.zIndex = '1';
 
-            setTimeout(() => {
-                feedback.classList.remove('visible');
-            }, 2500);
+            // Update screen content
+            const emoji = card.getAttribute('data-emoji');
+            const word = card.getAttribute('data-word');
+            const pronunciation = card.getAttribute('data-pronunciation');
+
+            screenEmoji.textContent = emoji;
+            screenWord.textContent = word;
+            screenPronunciation.textContent = pronunciation;
+            screenContent.classList.add('visible');
+
+            // Show remove button
+            removeBtn.classList.add('visible');
+
+            // Move to device wrapper
+            const deviceWrapper = document.querySelector('.device-wrapper');
+            deviceWrapper.appendChild(card);
         }
+
+        function removeCard(card, silent = false) {
+            if (!card) return;
+
+            card.classList.remove('inserted');
+            card.classList.add('returning');
+
+            // Clear screen
+            screenContent.classList.remove('visible');
+            removeBtn.classList.remove('visible');
+
+            // Return to original position
+            const originalData = cardOriginalPositions.get(card);
+            if (originalData) {
+                originalData.parent.appendChild(card);
+
+                setTimeout(() => {
+                    card.style.position = '';
+                    card.style.top = '';
+                    card.style.left = '';
+                    card.style.transform = '';
+                    card.style.zIndex = '';
+                    card.classList.remove('returning');
+                }, 100);
+            }
+
+            if (currentInsertedCard === card) {
+                currentInsertedCard = null;
+            }
+        }
+
+        // Prevent default drag behavior on images
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('dragstart', (e) => {
+                if (!img.classList.contains('card')) {
+                    e.preventDefault();
+                }
+            });
+        });
     </script>
 </body>
 </html>
