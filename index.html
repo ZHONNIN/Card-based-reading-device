@@ -117,18 +117,19 @@
         .device-mask {
             position: absolute;
             width: 100%;
-            height: 55%;
+            height: 260px;
             bottom: 0;
             left: 0;
-            z-index: 9;
+            background: transparent;
+            z-index: 20;
             pointer-events: none;
         }
 
         .slot-area {
             position: absolute;
-            width: 220px;
-            height: 320px;
-            top: 180px;
+            width: 260px;
+            height: 180px;
+            bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 8;
@@ -189,13 +190,9 @@
         }
 
         .card.inserted {
-            position: absolute !important;
-            top: 300px !important;
-            left: 50% !important;
-            transform: translateX(-50%) rotate(0deg) !important;
             z-index: 1 !important;
             cursor: pointer;
-            transition: top 0.4s ease-out, transform 0.4s ease-out !important;
+            transition: top 0.35s ease-out, transform 0.35s ease-out, left 0.35s ease-out !important;
         }
 
         .card.returning {
@@ -356,14 +353,14 @@
             dragStartY = touch.clientY;
 
             const rect = card.getBoundingClientRect();
-            cardStartX = rect.left;
+            cardStartX = rect.left + rect.width / 2;
             cardStartY = rect.top;
 
             card.classList.add('dragging');
             card.style.position = 'fixed';
-            card.style.left = rect.left + 'px';
+            card.style.left = cardStartX + 'px';
             card.style.top = rect.top + 'px';
-            card.style.transform = 'translateX(-50%)';
+            card.style.transform = 'translate(-50%, 0) rotate(0deg)';
             card.style.zIndex = '999';
         }
 
@@ -410,13 +407,29 @@
                 removeCard(currentInsertedCard, true);
             }
 
+            // Compute dynamic insertion position
+            const deviceRect = deviceWrapper.getBoundingClientRect();
+            const slotRect = slotArea.getBoundingClientRect();
+            const cardHeight = card.offsetHeight || 280;
+
+            // Position so ~90% of card is hidden behind device
+            const insertedTop = slotRect.top - deviceRect.top + (slotRect.height * 0.1);
+
             // Insert new card
             currentInsertedCard = card;
             card.classList.add('inserted');
-            card.classList.remove('returning');
+            card.classList.remove('returning', 'dragging');
 
             // Move to device wrapper
             deviceWrapper.appendChild(card);
+
+            // Set precise position
+            card.style.position = 'absolute';
+            card.style.left = '50%';
+            card.style.top = insertedTop + 'px';
+            card.style.transform = 'translateX(-50%) rotate(0deg)';
+            card.style.zIndex = '1';
+            card.style.transition = 'top 0.35s ease-out, transform 0.35s ease-out, left 0.35s ease-out';
 
             // Update screen content
             const emoji = card.getAttribute('data-emoji');
@@ -460,22 +473,28 @@
             // Return to cards container
             originalData.parent.appendChild(card);
 
-            // Reset styles
+            // Explicitly restore original fan position
+            const rotation = originalData.rotation;
+            const offset = originalData.positionOffset;
+            const zIndex = originalData.zIndex;
+
+            card.style.position = 'absolute';
+            card.style.left = `calc(50% + ${offset}px)`;
+            card.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+            card.style.zIndex = zIndex;
+            card.style.top = '';
+            card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            // After animation, clean up inline styles
             setTimeout(() => {
                 card.style.position = '';
                 card.style.left = '';
-                card.style.top = '';
                 card.style.transform = '';
                 card.style.zIndex = '';
-
-                // Reapply original positioning via class
-                const cardId = card.getAttribute('data-card-id');
-                card.setAttribute('data-card-id', cardId);
-
-                setTimeout(() => {
-                    card.classList.remove('returning');
-                }, 100);
-            }, 50);
+                card.style.top = '';
+                card.style.transition = '';
+                card.classList.remove('returning');
+            }, 550);
         }
 
         // Prevent default drag on all images
