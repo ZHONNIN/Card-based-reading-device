@@ -52,13 +52,14 @@
 
         .screen-overlay {
             position: absolute;
-            width: 66%;
-            height: 66%;
-            top: 24%;
-            left: 17%;
+            width: 420px;
+            height: 420px;
+            top: 145px;
+            left: 50%;
+            transform: translateX(-50%);
             overflow: hidden;
-            border-radius: 35px;
-            z-index: 11;
+            border-radius: 38px;
+            z-index: 20;
             pointer-events: none;
             display: flex;
             flex-direction: column;
@@ -76,11 +77,16 @@
             align-items: center;
             justify-content: center;
             gap: 25px;
+            text-align: center;
+            overflow: hidden;
             animation: fadeIn 0.4s ease-out;
         }
 
         .screen-content.visible {
             display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             max-width: 100%;
             max-height: 100%;
             overflow: hidden;
@@ -123,7 +129,7 @@
             bottom: 0;
             left: 0;
             background: transparent;
-            z-index: 20;
+            z-index: 60;
             pointer-events: none;
         }
 
@@ -145,6 +151,7 @@
             display: flex;
             align-items: flex-end;
             justify-content: center;
+            bottom: -40px;
         }
 
         .card {
@@ -169,19 +176,23 @@
         .card[data-card-id="frog"] {
             left: calc(50% - 160px);
             transform: translateX(-50%) rotate(-15deg);
-            z-index: 28;
+            z-index: 10;
         }
 
         .card[data-card-id="leaf"] {
             left: 50%;
             transform: translateX(-50%) rotate(0deg);
-            z-index: 30;
+            z-index: 11;
         }
 
         .card[data-card-id="water"] {
             left: calc(50% + 160px);
             transform: translateX(-50%) rotate(15deg);
-            z-index: 29;
+            z-index: 12;
+        }
+
+        .card:not(.inserted) {
+            z-index: inherit;
         }
 
         .card.dragging {
@@ -191,7 +202,7 @@
         }
 
         .card.inserted {
-            z-index: 1 !important;
+            z-index: 50 !important;
             cursor: pointer;
             transition: top 0.35s ease-out, transform 0.35s ease-out, left 0.35s ease-out !important;
         }
@@ -226,7 +237,7 @@
                  data-pronunciation="/frɒg/"
                  data-rotation="-15"
                  data-position-offset="-160"
-                 data-z-index="28">
+                 data-z-index="10">
 
             <img src="card2.png" alt="Leaf Card" class="card"
                  data-card-id="leaf"
@@ -235,7 +246,7 @@
                  data-pronunciation="/liːf/"
                  data-rotation="0"
                  data-position-offset="0"
-                 data-z-index="30">
+                 data-z-index="11">
 
             <img src="card3.png" alt="Water Card" class="card"
                  data-card-id="water"
@@ -244,7 +255,7 @@
                  data-pronunciation="/ˈwɔːtər/"
                  data-rotation="15"
                  data-position-offset="160"
-                 data-z-index="29">
+                 data-z-index="12">
         </div>
     </div>
 
@@ -387,7 +398,7 @@
             card.style.left = '50%';
             card.style.top = insertedTop + 'px';
             card.style.transform = 'translateX(-50%) rotate(0deg)';
-            card.style.zIndex = '1';
+            card.style.zIndex = '50';
             card.style.transition = 'top 0.35s ease-out, transform 0.35s ease-out, left 0.35s ease-out';
 
             // Update screen content
