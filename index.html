@@ -142,23 +142,23 @@
             align-items: flex-end;
             justify-content: center;
             width: 100%;
-            height: 350px;
+            height: 420px;
             margin-bottom: 20px;
         }
 
         .card {
             position: absolute;
             width: auto;
-            height: 280px;
+            height: 380px;
             cursor: grab;
             transition: transform 0.3s ease, z-index 0s;
-            filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35));
             user-select: none;
             transform-origin: center bottom;
         }
 
         .card:hover {
-            filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.4));
+            filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.45));
         }
 
         .card:active {
@@ -166,21 +166,21 @@
         }
 
         .card[data-card-id="frog"] {
-            left: calc(50% - 180px);
-            transform: translateX(-50%) rotate(-10deg);
-            z-index: 13;
+            left: calc(50% - 120px);
+            transform: translateX(-50%) rotate(-14deg);
+            z-index: 28;
         }
 
         .card[data-card-id="leaf"] {
             left: 50%;
             transform: translateX(-50%) rotate(0deg);
-            z-index: 15;
+            z-index: 30;
         }
 
         .card[data-card-id="water"] {
-            left: calc(50% + 180px);
-            transform: translateX(-50%) rotate(10deg);
-            z-index: 14;
+            left: calc(50% + 120px);
+            transform: translateX(-50%) rotate(14deg);
+            z-index: 29;
         }
 
         .card.dragging {
@@ -255,9 +255,9 @@
                  data-emoji="🐸"
                  data-word="Frog"
                  data-pronunciation="/frɒg/"
-                 data-rotation="-10"
-                 data-position-offset="-180"
-                 data-z-index="13">
+                 data-rotation="-14"
+                 data-position-offset="-120"
+                 data-z-index="28">
 
             <img src="card2.png" alt="Leaf Card" class="card"
                  data-card-id="leaf"
@@ -266,16 +266,16 @@
                  data-pronunciation="/liːf/"
                  data-rotation="0"
                  data-position-offset="0"
-                 data-z-index="15">
+                 data-z-index="30">
 
             <img src="card3.png" alt="Water Card" class="card"
                  data-card-id="water"
                  data-emoji="💧"
                  data-word="Water"
                  data-pronunciation="/ˈwɔːtər/"
-                 data-rotation="10"
-                 data-position-offset="180"
-                 data-z-index="14">
+                 data-rotation="14"
+                 data-position-offset="120"
+                 data-z-index="29">
         </div>
 
         <button class="remove-btn" id="removeBtn">Remove Card</button>
@@ -410,7 +410,7 @@
             // Compute dynamic insertion position
             const deviceRect = deviceWrapper.getBoundingClientRect();
             const slotRect = slotArea.getBoundingClientRect();
-            const cardHeight = card.offsetHeight || 280;
+            const cardHeight = card.offsetHeight || 380;
 
             // Position so ~90% of card is hidden behind device
             const insertedTop = slotRect.top - deviceRect.top + (slotRect.height * 0.1);
