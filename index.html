@@ -17,28 +17,26 @@
             height: 100vh;
             width: 100vw;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             position: fixed;
         }
 
-        .container {
-            position: relative;
+        .main-layout {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
+            gap: 40px;
             width: 100%;
             height: 100%;
-            justify-content: space-between;
             padding: 20px;
         }
 
-        .device-wrapper {
+        .device-area {
             position: relative;
             width: 940px;
-            margin: 0 auto;
             flex-shrink: 0;
         }
 
@@ -54,13 +52,12 @@
 
         .screen-overlay {
             position: absolute;
-            width: 490px;
-            height: 490px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -56%);
+            width: 66%;
+            height: 66%;
+            top: 24%;
+            left: 17%;
             overflow: hidden;
-            border-radius: 40px;
+            border-radius: 35px;
             z-index: 11;
             pointer-events: none;
             display: flex;
@@ -122,34 +119,32 @@
         .device-mask {
             position: absolute;
             width: 100%;
-            height: 290px;
+            height: 35%;
             bottom: 0;
             left: 0;
-            background: transparent;
+            background: white;
             z-index: 20;
             pointer-events: none;
         }
 
         .slot-area {
             position: absolute;
-            width: 260px;
-            height: 180px;
-            bottom: 120px;
+            width: 280px;
+            height: 200px;
+            bottom: 9%;
             left: 50%;
             transform: translateX(-50%);
             z-index: 8;
             pointer-events: all;
         }
 
-        .cards-container {
+        .card-deck-area {
             position: relative;
+            height: 320px;
+            width: 100%;
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            width: 100%;
-            height: 450px;
-            margin-bottom: 0;
-            bottom: -40px;
         }
 
         .card {
@@ -172,8 +167,8 @@
         }
 
         .card[data-card-id="frog"] {
-            left: calc(50% - 120px);
-            transform: translateX(-50%) rotate(-14deg);
+            left: calc(50% - 160px);
+            transform: translateX(-50%) rotate(-15deg);
             z-index: 28;
         }
 
@@ -184,8 +179,8 @@
         }
 
         .card[data-card-id="water"] {
-            left: calc(50% + 120px);
-            transform: translateX(-50%) rotate(14deg);
+            left: calc(50% + 160px);
+            transform: translateX(-50%) rotate(15deg);
             z-index: 29;
         }
 
@@ -204,43 +199,11 @@
         .card.returning {
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
-
-        .remove-btn {
-            padding: 18px 45px;
-            background: #ff6b6b;
-            color: white;
-            border: 4px solid #c92a2a;
-            border-radius: 36px;
-            font-size: 26px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            pointer-events: none;
-            position: absolute;
-            bottom: 30px;
-            z-index: 20;
-        }
-
-        .remove-btn.visible {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .remove-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
-        }
-
-        .remove-btn:active {
-            transform: translateY(0);
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="device-wrapper">
+    <div class="main-layout">
+        <div class="device-area">
             <img src="po.png" alt="Card Reader Device" class="device-image" id="deviceImage">
 
             <div class="screen-overlay" id="screenOverlay">
@@ -255,14 +218,14 @@
             <div class="slot-area" id="slotArea"></div>
         </div>
 
-        <div class="cards-container" id="cardsContainer">
+        <div class="card-deck-area" id="cardDeckArea">
             <img src="card1.png" alt="Frog Card" class="card"
                  data-card-id="frog"
                  data-emoji="🐸"
                  data-word="Frog"
                  data-pronunciation="/frɒg/"
-                 data-rotation="-14"
-                 data-position-offset="-120"
+                 data-rotation="-15"
+                 data-position-offset="-160"
                  data-z-index="28">
 
             <img src="card2.png" alt="Leaf Card" class="card"
@@ -279,24 +242,21 @@
                  data-emoji="💧"
                  data-word="Water"
                  data-pronunciation="/ˈwɔːtər/"
-                 data-rotation="14"
-                 data-position-offset="120"
+                 data-rotation="15"
+                 data-position-offset="160"
                  data-z-index="29">
         </div>
-
-        <button class="remove-btn" id="removeBtn">Remove Card</button>
     </div>
 
     <script>
         const cards = document.querySelectorAll('.card');
-        const cardsContainer = document.getElementById('cardsContainer');
+        const cardDeckArea = document.getElementById('cardDeckArea');
         const slotArea = document.getElementById('slotArea');
-        const deviceWrapper = document.querySelector('.device-wrapper');
+        const deviceArea = document.querySelector('.device-area');
         const screenContent = document.getElementById('screenContent');
         const screenEmoji = document.getElementById('screenEmoji');
         const screenWord = document.getElementById('screenWord');
         const screenPronunciation = document.getElementById('screenPronunciation');
-        const removeBtn = document.getElementById('removeBtn');
 
         let currentInsertedCard = null;
         let draggedCard = null;
@@ -340,12 +300,6 @@
 
         document.addEventListener('mouseup', endDrag);
         document.addEventListener('touchend', endDrag);
-
-        removeBtn.addEventListener('click', () => {
-            if (currentInsertedCard) {
-                removeCard(currentInsertedCard);
-            }
-        });
 
         function startDrag(e) {
             const card = e.currentTarget;
@@ -413,23 +367,20 @@
                 removeCard(currentInsertedCard, true);
             }
 
-            // Compute dynamic insertion position based on screen overlay
-            const deviceRect = deviceWrapper.getBoundingClientRect();
-            const screenOverlay = document.getElementById('screenOverlay');
-            const screenRect = screenOverlay.getBoundingClientRect();
-            const cardHeight = card.offsetHeight || 420;
+            // Compute dynamic insertion position based on slot area
+            const deviceRect = deviceArea.getBoundingClientRect();
+            const slotRect = slotArea.getBoundingClientRect();
 
-            // Position so card's top edge is just slightly above the bottom edge of screen
-            // 75% of card is inside device, 25% visible above slot
-            const insertedTop = screenRect.bottom - deviceRect.top - (cardHeight * 0.25);
+            // Position so card snaps lower into the slot
+            const insertedTop = slotRect.top - deviceRect.top + (slotRect.height * 0.15);
 
             // Insert new card
             currentInsertedCard = card;
             card.classList.add('inserted');
             card.classList.remove('returning', 'dragging');
 
-            // Move to device wrapper
-            deviceWrapper.appendChild(card);
+            // Move to device area
+            deviceArea.appendChild(card);
 
             // Set precise position
             card.style.position = 'absolute';
@@ -448,9 +399,6 @@
             screenWord.textContent = word;
             screenPronunciation.textContent = pronunciation;
             screenContent.classList.add('visible');
-
-            // Show remove button
-            removeBtn.classList.add('visible');
         }
 
         function removeCard(card, silent = false) {
@@ -461,7 +409,6 @@
             // Clear screen
             if (!silent) {
                 screenContent.classList.remove('visible');
-                removeBtn.classList.remove('visible');
             }
 
             // Return to original position
@@ -478,8 +425,8 @@
 
             card.classList.add('returning');
 
-            // Return to cards container
-            originalData.parent.appendChild(card);
+            // Return to card deck area
+            cardDeckArea.appendChild(card);
 
             // Explicitly restore original fan position
             const rotation = originalData.rotation;
