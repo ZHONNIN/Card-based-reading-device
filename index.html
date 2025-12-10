@@ -45,8 +45,8 @@
 
         .assembly-frame {
             position: relative;
-            width: 360px;
-            height: 360px;
+            width: 620px;
+            height: 620px;
             border: 4px dashed rgba(100, 100, 100, 0.4);
             border-radius: 16px;
             background: rgba(255, 255, 255, 0.25);
@@ -103,13 +103,13 @@
             gap: 25px;
             justify-content: center;
             align-items: center;
-            width: 360px;
-            min-height: 200px;
+            width: 680px;
+            min-height: 400px;
         }
 
         .puzzle-piece {
-            width: 155px;
-            height: 155px;
+            width: 310px;
+            height: 310px;
             cursor: grab;
             filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
             transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
@@ -307,7 +307,7 @@
                 <div class="assembly-slot" data-position="bottom-right"></div>
 
                 <!-- Complete Card (appears after assembly) -->
-                <img src="card1.png" alt="Complete Card" class="complete-card" id="completeCard"
+                <img src="complete.png" alt="Complete Card" class="complete-card" id="completeCard"
                      data-emoji="🐸"
                      data-word="Frog"
                      data-pronunciation="/frɒg/">
@@ -611,8 +611,8 @@
             card.style.top = insertedTop + 'px';
             card.style.transform = 'translateX(-50%) rotate(0deg)';
             card.style.zIndex = '10';
-            card.style.width = '360px';
-            card.style.height = '360px';
+            card.style.width = '620px';
+            card.style.height = '620px';
             card.style.transition = 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), left 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
 
             // Update screen content
