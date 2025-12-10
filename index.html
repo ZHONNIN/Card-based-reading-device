@@ -25,9 +25,8 @@
 
         .main-layout {
             display: flex;
-            flex-direction: row;
-            align-items: center;
             justify-content: center;
+            align-items: flex-start;
             gap: 60px;
             width: 100%;
             height: 100%;
@@ -39,20 +38,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 40px;
+            gap: 0;
             position: relative;
-            width: 720px;
             flex-shrink: 0;
         }
 
         .assembly-frame {
             position: relative;
-            width: 620px;
-            height: 620px;
-            border: 6px solid rgba(80, 80, 80, 0.55);
+            width: 580px;
+            height: 580px;
+            border: 4px solid rgba(50, 50, 50, 0.6);
             border-radius: 16px;
             background: rgba(255, 255, 255, 0.25);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 30;
+            flex-shrink: 0;
         }
 
         .assembly-slot {
@@ -100,17 +100,14 @@
 
         .puzzle-pieces-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 25px;
+            gap: 20px;
             justify-content: center;
-            align-items: center;
-            width: 680px;
-            min-height: 400px;
+            margin-top: 40px;
         }
 
         .puzzle-piece {
-            width: 420px;
-            height: 420px;
+            width: 200px;
+            height: 200px;
             cursor: grab;
             filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
             transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
@@ -187,7 +184,7 @@
         /* ==================== DEVICE AREA ==================== */
         .device-area {
             position: relative;
-            width: 940px;
+            width: 520px;
             flex-shrink: 0;
         }
 
@@ -612,8 +609,8 @@
             card.style.top = insertedTop + 'px';
             card.style.transform = 'translateX(-50%) rotate(0deg)';
             card.style.zIndex = '10';
-            card.style.width = '620px';
-            card.style.height = '620px';
+            card.style.width = '580px';
+            card.style.height = '580px';
             card.style.transition = 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), left 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
 
             // Update screen content
@@ -647,8 +644,8 @@
             card.style.position = 'absolute';
             card.style.left = '0';
             card.style.top = '0';
-            card.style.width = '100%';
-            card.style.height = '100%';
+            card.style.width = '580px';
+            card.style.height = '580px';
             card.style.transform = 'rotate(0deg)';
             card.style.zIndex = '15';
             card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
