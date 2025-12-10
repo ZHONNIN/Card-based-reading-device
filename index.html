@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Reader Toy – Fan-Spread Cards</title>
+    <title>Card Reader Toy – Puzzle Assembly</title>
     <style>
         * {
             margin: 0;
@@ -25,15 +25,165 @@
 
         .main-layout {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            justify-content: flex-start;
-            gap: 40px;
+            justify-content: center;
+            gap: 60px;
             width: 100%;
             height: 100%;
             padding: 20px;
         }
 
+        /* ==================== PUZZLE ASSEMBLY AREA ==================== */
+        .puzzle-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            position: relative;
+        }
+
+        .assembly-frame {
+            position: relative;
+            width: 360px;
+            height: 360px;
+            border: 4px dashed rgba(100, 100, 100, 0.4);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .assembly-slot {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            border: 2px dashed rgba(120, 120, 120, 0.25);
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: rgba(150, 150, 150, 0.2);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .assembly-slot[data-position="top-left"] {
+            top: 0;
+            left: 0;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+        }
+
+        .assembly-slot[data-position="top-right"] {
+            top: 0;
+            right: 0;
+            border-left-width: 1px;
+            border-bottom-width: 1px;
+        }
+
+        .assembly-slot[data-position="bottom-left"] {
+            bottom: 0;
+            left: 0;
+            border-right-width: 1px;
+            border-top-width: 1px;
+        }
+
+        .assembly-slot[data-position="bottom-right"] {
+            bottom: 0;
+            right: 0;
+            border-left-width: 1px;
+            border-top-width: 1px;
+        }
+
+        .puzzle-pieces-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            align-items: center;
+            width: 360px;
+            min-height: 200px;
+        }
+
+        .puzzle-piece {
+            width: 155px;
+            height: 155px;
+            cursor: grab;
+            filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
+            transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+            user-select: none;
+            transform-origin: center center;
+        }
+
+        .puzzle-piece:hover {
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45));
+            transform: scale(1.05) rotate(0deg) !important;
+        }
+
+        .puzzle-piece:active {
+            cursor: grabbing;
+        }
+
+        .puzzle-piece.dragging {
+            z-index: 1000;
+            transition: none;
+            cursor: grabbing;
+        }
+
+        .puzzle-piece.snapped {
+            cursor: default;
+            filter: none;
+            pointer-events: none;
+        }
+
+        .puzzle-piece.fade-out {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Complete Card */
+        .complete-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+            cursor: grab;
+            filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.4));
+            transition: opacity 0.8s ease 0.3s;
+            user-select: none;
+            z-index: 15;
+        }
+
+        .complete-card.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .complete-card:hover {
+            filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.5));
+        }
+
+        .complete-card.dragging {
+            z-index: 1000;
+            cursor: grabbing;
+            transition: none;
+        }
+
+        .complete-card.inserted {
+            z-index: 10 !important;
+            cursor: pointer;
+            transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        /* ==================== DEVICE AREA ==================== */
         .device-area {
             position: relative;
             width: 940px;
@@ -79,7 +229,7 @@
             gap: 25px;
             text-align: center;
             overflow: hidden;
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeIn 0.5s ease-out;
         }
 
         .screen-content.visible {
@@ -95,7 +245,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: scale(0.85);
+                transform: scale(0.8);
             }
             to {
                 opacity: 1;
@@ -143,79 +293,41 @@
             z-index: 8;
             pointer-events: all;
         }
-
-        .card-deck-area {
-            position: relative;
-            height: 320px;
-            width: 100%;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            bottom: -40px;
-        }
-
-        .card {
-            position: absolute;
-            width: auto;
-            height: 420px;
-            cursor: grab;
-            transition: transform 0.3s ease, z-index 0s;
-            filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35));
-            user-select: none;
-            transform-origin: center bottom;
-        }
-
-        .card:hover {
-            filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.45));
-        }
-
-        .card:active {
-            cursor: grabbing;
-        }
-
-        .card[data-card-id="frog"] {
-            left: calc(50% - 160px);
-            transform: translateX(-50%) rotate(-15deg);
-            z-index: 1;
-        }
-
-        .card[data-card-id="leaf"] {
-            left: 50%;
-            transform: translateX(-50%) rotate(0deg);
-            z-index: 1;
-        }
-
-        .card[data-card-id="water"] {
-            left: calc(50% + 160px);
-            transform: translateX(-50%) rotate(15deg);
-            z-index: 1;
-        }
-
-        .card:not(.inserted) {
-            z-index: inherit;
-        }
-
-        .card.dragging {
-            z-index: 999 !important;
-            transition: none;
-            cursor: grabbing;
-        }
-
-        .card.inserted {
-            z-index: 10 !important;
-            cursor: pointer;
-            transition: top 0.35s ease-out, transform 0.35s ease-out, left 0.35s ease-out !important;
-        }
-
-        .card.returning {
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
     </style>
 </head>
 <body>
     <div class="main-layout">
-        <div class="device-area">
-            <img src="po.png" alt="Card Reader Device" class="device-image" id="deviceImage">
+        <!-- Puzzle Assembly Area -->
+        <div class="puzzle-area">
+            <div class="assembly-frame" id="assemblyFrame">
+                <!-- Assembly slots with visual guides -->
+                <div class="assembly-slot" data-position="top-left"></div>
+                <div class="assembly-slot" data-position="top-right"></div>
+                <div class="assembly-slot" data-position="bottom-left"></div>
+                <div class="assembly-slot" data-position="bottom-right"></div>
+
+                <!-- Complete Card (appears after assembly) -->
+                <img src="card1.png" alt="Complete Card" class="complete-card" id="completeCard"
+                     data-emoji="🐸"
+                     data-word="Frog"
+                     data-pronunciation="/frɒg/">
+            </div>
+
+            <div class="puzzle-pieces-container" id="piecesContainer">
+                <img src="FOTLC.png" alt="Top-Left Piece" class="puzzle-piece"
+                     data-position="top-left" id="pieceTL">
+                <img src="FOTRC.png" alt="Top-Right Piece" class="puzzle-piece"
+                     data-position="top-right" id="pieceTR">
+                <img src="FOLLQ.png" alt="Bottom-Left Piece" class="puzzle-piece"
+                     data-position="bottom-left" id="pieceBL">
+                <img src="FOLRQ.png" alt="Bottom-Right Piece" class="puzzle-piece"
+                     data-position="bottom-right" id="pieceBR">
+            </div>
+        </div>
+
+        <!-- Device Area -->
+        <div class="device-area" id="deviceArea">
+            <img src="po.png" alt="Card Reader Device" class="device-image">
 
             <div class="screen-overlay" id="screenOverlay">
                 <div class="screen-content" id="screenContent">
@@ -228,134 +340,241 @@
             <div class="device-mask"></div>
             <div class="slot-area" id="slotArea"></div>
         </div>
-
-        <div class="card-deck-area" id="cardDeckArea">
-            <img src="card1.png" alt="Frog Card" class="card"
-                 data-card-id="frog"
-                 data-emoji="🐸"
-                 data-word="Frog"
-                 data-pronunciation="/frɒg/"
-                 data-rotation="-15"
-                 data-position-offset="-160"
-                 data-z-index="1">
-
-            <img src="card2.png" alt="Leaf Card" class="card"
-                 data-card-id="leaf"
-                 data-emoji="🌿"
-                 data-word="Leaf"
-                 data-pronunciation="/liːf/"
-                 data-rotation="0"
-                 data-position-offset="0"
-                 data-z-index="1">
-
-            <img src="card3.png" alt="Water Card" class="card"
-                 data-card-id="water"
-                 data-emoji="💧"
-                 data-word="Water"
-                 data-pronunciation="/ˈwɔːtər/"
-                 data-rotation="15"
-                 data-position-offset="160"
-                 data-z-index="1">
-        </div>
     </div>
 
     <script>
-        const cards = document.querySelectorAll('.card');
-        const cardDeckArea = document.getElementById('cardDeckArea');
+        // ==================== DOM ELEMENTS ====================
+        const assemblyFrame = document.getElementById('assemblyFrame');
+        const piecesContainer = document.getElementById('piecesContainer');
+        const puzzlePieces = document.querySelectorAll('.puzzle-piece');
+        const assemblySlots = document.querySelectorAll('.assembly-slot');
+        const completeCard = document.getElementById('completeCard');
+        const deviceArea = document.getElementById('deviceArea');
         const slotArea = document.getElementById('slotArea');
-        const deviceArea = document.querySelector('.device-area');
         const screenContent = document.getElementById('screenContent');
         const screenEmoji = document.getElementById('screenEmoji');
         const screenWord = document.getElementById('screenWord');
         const screenPronunciation = document.getElementById('screenPronunciation');
 
-        let currentInsertedCard = null;
-        let draggedCard = null;
+        // ==================== STATE ====================
+        let draggedElement = null;
         let dragStartX = 0;
         let dragStartY = 0;
-        let cardStartX = 0;
-        let cardStartY = 0;
+        let elementStartX = 0;
+        let elementStartY = 0;
+        const snappedPieces = new Set();
+        let puzzleComplete = false;
+        let currentInsertedCard = null;
 
-        // Store original card data
-        const cardOriginalData = new Map();
-        cards.forEach(card => {
-            cardOriginalData.set(card, {
-                rotation: card.getAttribute('data-rotation'),
-                positionOffset: card.getAttribute('data-position-offset'),
-                zIndex: card.getAttribute('data-z-index'),
-                parent: card.parentElement
-            });
+        // ==================== INITIALIZATION ====================
+        // Randomize puzzle piece positions and rotations
+        puzzlePieces.forEach(piece => {
+            const randomRotation = Math.random() * 30 - 15; // -15° to +15°
+            piece.style.transform = `rotate(${randomRotation}deg)`;
+            piece.dataset.originalRotation = randomRotation;
         });
 
-        // Click to insert/remove
-        cards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (!card.classList.contains('dragging') && !draggedCard) {
-                    if (card === currentInsertedCard) {
-                        removeCard(card);
-                    } else {
-                        insertCard(card);
-                    }
-                }
-            });
-
-            // Mouse drag
-            card.addEventListener('mousedown', startDrag);
-
-            // Touch drag
-            card.addEventListener('touchstart', startDrag, { passive: false });
+        // ==================== PUZZLE PIECE DRAG HANDLERS ====================
+        puzzlePieces.forEach(piece => {
+            piece.addEventListener('mousedown', startPieceDrag);
+            piece.addEventListener('touchstart', startPieceDrag, { passive: false });
         });
 
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', drag, { passive: false });
-
+        document.addEventListener('mousemove', handleDrag);
+        document.addEventListener('touchmove', handleDrag, { passive: false });
         document.addEventListener('mouseup', endDrag);
         document.addEventListener('touchend', endDrag);
 
-        function startDrag(e) {
-            const card = e.currentTarget;
-            if (card.classList.contains('inserted')) return;
+        function startPieceDrag(e) {
+            const piece = e.currentTarget;
+            if (piece.classList.contains('snapped')) return;
 
             e.preventDefault();
-            draggedCard = card;
+            draggedElement = piece;
 
             const touch = e.touches ? e.touches[0] : e;
             dragStartX = touch.clientX;
             dragStartY = touch.clientY;
 
-            const rect = card.getBoundingClientRect();
-            cardStartX = rect.left + rect.width / 2;
-            cardStartY = rect.top;
+            const rect = piece.getBoundingClientRect();
+            elementStartX = rect.left + rect.width / 2;
+            elementStartY = rect.top + rect.height / 2;
 
-            card.classList.add('dragging');
-            card.style.position = 'fixed';
-            card.style.left = cardStartX + 'px';
-            card.style.top = rect.top + 'px';
-            card.style.transform = 'translate(-50%, 0) rotate(0deg)';
-            card.style.zIndex = '999';
+            piece.classList.add('dragging');
+            piece.style.position = 'fixed';
+            piece.style.left = elementStartX + 'px';
+            piece.style.top = elementStartY + 'px';
+            piece.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+            piece.style.zIndex = '1000';
         }
 
-        function drag(e) {
-            if (!draggedCard) return;
+        function handleDrag(e) {
+            if (!draggedElement) return;
             e.preventDefault();
 
             const touch = e.touches ? e.touches[0] : e;
             const deltaX = touch.clientX - dragStartX;
             const deltaY = touch.clientY - dragStartY;
 
-            draggedCard.style.left = (cardStartX + deltaX) + 'px';
-            draggedCard.style.top = (cardStartY + deltaY) + 'px';
+            draggedElement.style.left = (elementStartX + deltaX) + 'px';
+            draggedElement.style.top = (elementStartY + deltaY) + 'px';
         }
 
         function endDrag(e) {
-            if (!draggedCard) return;
+            if (!draggedElement) return;
 
-            const card = draggedCard;
+            const element = draggedElement;
+
+            // Check if it's a puzzle piece or complete card
+            if (element.classList.contains('puzzle-piece')) {
+                endPieceDrag(element);
+            } else if (element.classList.contains('complete-card')) {
+                endCardDrag(element);
+            }
+
+            draggedElement = null;
+        }
+
+        function endPieceDrag(piece) {
+            const piecePosition = piece.dataset.position;
+            const pieceRect = piece.getBoundingClientRect();
+
+            // Check if piece is over the correct slot
+            let snapped = false;
+            assemblySlots.forEach(slot => {
+                const slotPosition = slot.dataset.position;
+                if (slotPosition !== piecePosition) return;
+
+                const slotRect = slot.getBoundingClientRect();
+
+                // Calculate overlap area
+                const overlapX = Math.max(0, Math.min(pieceRect.right, slotRect.right) - Math.max(pieceRect.left, slotRect.left));
+                const overlapY = Math.max(0, Math.min(pieceRect.bottom, slotRect.bottom) - Math.max(pieceRect.top, slotRect.top));
+                const overlapArea = overlapX * overlapY;
+                const pieceArea = pieceRect.width * pieceRect.height;
+
+                // If at least 25% of piece is over the correct slot, snap it
+                if (overlapArea > pieceArea * 0.25) {
+                    snapPieceToSlot(piece, slot);
+                    snapped = true;
+                }
+            });
+
+            if (!snapped) {
+                returnPieceToContainer(piece);
+            }
+        }
+
+        function snapPieceToSlot(piece, slot) {
+            const slotRect = slot.getBoundingClientRect();
+            const frameRect = assemblyFrame.getBoundingClientRect();
+
+            // Calculate position relative to frame
+            const relativeTop = slotRect.top - frameRect.top;
+            const relativeLeft = slotRect.left - frameRect.left;
+
+            // Move piece to assembly frame
+            assemblyFrame.appendChild(piece);
+
+            piece.style.position = 'absolute';
+            piece.style.left = relativeLeft + 'px';
+            piece.style.top = relativeTop + 'px';
+            piece.style.width = '50%';
+            piece.style.height = '50%';
+            piece.style.transform = 'rotate(0deg)';
+            piece.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            piece.style.zIndex = '5';
+            piece.classList.add('snapped');
+            piece.classList.remove('dragging');
+
+            snappedPieces.add(piece.dataset.position);
+
+            // Check if puzzle is complete
+            if (snappedPieces.size === 4) {
+                setTimeout(completePuzzle, 600);
+            }
+        }
+
+        function returnPieceToContainer(piece) {
+            piece.classList.remove('dragging');
+            piecesContainer.appendChild(piece);
+
+            piece.style.position = '';
+            piece.style.left = '';
+            piece.style.top = '';
+            piece.style.width = '';
+            piece.style.height = '';
+            piece.style.transform = `rotate(${piece.dataset.originalRotation}deg)`;
+            piece.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            piece.style.zIndex = '';
+
+            setTimeout(() => {
+                piece.style.transition = '';
+            }, 400);
+        }
+
+        function completePuzzle() {
+            puzzleComplete = true;
+
+            // Fade out puzzle pieces
+            puzzlePieces.forEach(piece => {
+                piece.classList.add('fade-out');
+            });
+
+            // Fade in complete card
+            setTimeout(() => {
+                completeCard.classList.add('visible');
+
+                // Remove puzzle pieces from DOM after fade
+                setTimeout(() => {
+                    puzzlePieces.forEach(piece => {
+                        piece.style.display = 'none';
+                    });
+                }, 800);
+            }, 400);
+        }
+
+        // ==================== COMPLETE CARD DRAG HANDLERS ====================
+        completeCard.addEventListener('mousedown', startCardDrag);
+        completeCard.addEventListener('touchstart', startCardDrag, { passive: false });
+
+        // Click to remove inserted card
+        completeCard.addEventListener('click', (e) => {
+            if (completeCard.classList.contains('inserted') && !draggedElement) {
+                removeCard(completeCard);
+            }
+        });
+
+        function startCardDrag(e) {
+            if (!puzzleComplete) return;
+            if (completeCard.classList.contains('inserted')) return;
+
+            e.preventDefault();
+            draggedElement = completeCard;
+
+            const touch = e.touches ? e.touches[0] : e;
+            dragStartX = touch.clientX;
+            dragStartY = touch.clientY;
+
+            const rect = completeCard.getBoundingClientRect();
+            elementStartX = rect.left + rect.width / 2;
+            elementStartY = rect.top + rect.height / 2;
+
+            completeCard.classList.add('dragging');
+            completeCard.style.position = 'fixed';
+            completeCard.style.left = elementStartX + 'px';
+            completeCard.style.top = elementStartY + 'px';
+            completeCard.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+            completeCard.style.zIndex = '1000';
+        }
+
+        function endCardDrag(card) {
             card.classList.remove('dragging');
 
             const cardRect = card.getBoundingClientRect();
             const slotRect = slotArea.getBoundingClientRect();
 
+            // Check if card is over the slot area
             const isOverSlot = (
                 cardRect.left < slotRect.right &&
                 cardRect.right > slotRect.left &&
@@ -366,18 +585,11 @@
             if (isOverSlot) {
                 insertCard(card);
             } else {
-                returnCardToOriginalPosition(card);
+                returnCardToFrame(card);
             }
-
-            draggedCard = null;
         }
 
         function insertCard(card) {
-            // Remove previous card if exists
-            if (currentInsertedCard && currentInsertedCard !== card) {
-                removeCard(currentInsertedCard, true);
-            }
-
             // Compute dynamic insertion position based on slot area
             const deviceRect = deviceArea.getBoundingClientRect();
             const slotRect = slotArea.getBoundingClientRect();
@@ -385,10 +597,10 @@
             // Position so card snaps lower into the slot
             const insertedTop = slotRect.top - deviceRect.top + (slotRect.height * 0.15);
 
-            // Insert new card
+            // Insert card
             currentInsertedCard = card;
             card.classList.add('inserted');
-            card.classList.remove('returning', 'dragging');
+            card.classList.remove('dragging');
 
             // Move to device area
             deviceArea.appendChild(card);
@@ -399,7 +611,9 @@
             card.style.top = insertedTop + 'px';
             card.style.transform = 'translateX(-50%) rotate(0deg)';
             card.style.zIndex = '10';
-            card.style.transition = 'top 0.35s ease-out, transform 0.35s ease-out, left 0.35s ease-out';
+            card.style.width = '360px';
+            card.style.height = '360px';
+            card.style.transition = 'top 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), left 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
 
             // Update screen content
             const emoji = card.getAttribute('data-emoji');
@@ -412,58 +626,38 @@
             screenContent.classList.add('visible');
         }
 
-        function removeCard(card, silent = false) {
+        function removeCard(card) {
             if (!card) return;
 
             card.classList.remove('inserted');
+            screenContent.classList.remove('visible');
 
-            // Clear screen
-            if (!silent) {
-                screenContent.classList.remove('visible');
-            }
-
-            // Return to original position
-            returnCardToOriginalPosition(card);
+            returnCardToFrame(card);
 
             if (currentInsertedCard === card) {
                 currentInsertedCard = null;
             }
         }
 
-        function returnCardToOriginalPosition(card) {
-            const originalData = cardOriginalData.get(card);
-            if (!originalData) return;
-
-            card.classList.add('returning');
-
-            // Return to card deck area
-            cardDeckArea.appendChild(card);
-
-            // Explicitly restore original fan position
-            const rotation = originalData.rotation;
-            const offset = originalData.positionOffset;
-            const zIndex = originalData.zIndex;
+        function returnCardToFrame(card) {
+            card.classList.remove('dragging');
+            assemblyFrame.appendChild(card);
 
             card.style.position = 'absolute';
-            card.style.left = `calc(50% + ${offset}px)`;
-            card.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
-            card.style.zIndex = zIndex;
-            card.style.top = '';
+            card.style.left = '0';
+            card.style.top = '0';
+            card.style.width = '100%';
+            card.style.height = '100%';
+            card.style.transform = 'rotate(0deg)';
+            card.style.zIndex = '15';
             card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
 
-            // After animation, clean up inline styles
             setTimeout(() => {
-                card.style.position = '';
-                card.style.left = '';
-                card.style.transform = '';
-                card.style.zIndex = '';
-                card.style.top = '';
                 card.style.transition = '';
-                card.classList.remove('returning');
-            }, 550);
+            }, 500);
         }
 
-        // Prevent default drag on all images
+        // ==================== PREVENT DEFAULT IMAGE DRAG ====================
         document.querySelectorAll('img').forEach(img => {
             img.addEventListener('dragstart', (e) => {
                 e.preventDefault();
